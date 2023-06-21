@@ -66,7 +66,7 @@ func setupServicesListener() {
 	go func() {
 		var err error
 
-		if config.IsServiceSSL() {
+		if config.IsAdminSSL() {
 			err = service.StartTLS(config.GetFullServiceAppAddress(), config.CertFile, config.KeyFile)
 		} else {
 			err = service.Start(config.GetFullServiceAppAddress())

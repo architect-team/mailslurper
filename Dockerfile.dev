@@ -1,20 +1,19 @@
-FROM golang:alpine as builder
+FROM golang:latest
+
+ENV PROJECT_DIR=/app \
+  GO111MODULE=on
 
 LABEL maintainer="erguotou525@gmail.compute"
 
-RUN apk --no-cache add git libc-dev gcc
 RUN go install github.com/mjibson/esc@latest
 
 COPY . /go/src/github.com/mailslurper/mailslurper
 WORKDIR /go/src/github.com/mailslurper/mailslurper/cmd/mailslurper
 
-RUN go get
-RUN go generate
-RUN go build
+RUN go get github.com/githubnemo/CompileDaemon
+RUN go install github.com/githubnemo/CompileDaemon
 
-FROM alpine:3.18
-
-RUN apk add --no-cache ca-certificates \
+RUN mkdir "/build" \
   && echo -e '{\n\
   "wwwAddress": "0.0.0.0",\n\
   "wwwPort": 8080,\n\
@@ -32,16 +31,9 @@ RUN apk add --no-cache ca-certificates \
   "dbPassword": "",\n\
   "maxWorkers": 1000,\n\
   "autoStartBrowser": false,\n\
-  "keyFile": "./assets/ca-key.pem",\n\
-  "certFile": "./assets/ca-cert.pem",\n\
+  "keyFile": "",\n\
+  "certFile": "",\n\
   "adminKeyFile": "",\n\
   "adminCertFile": ""\n\
   }'\
-  >> config.json
-
-COPY --from=builder /go/src/github.com/mailslurper/mailslurper/assets/* ./assets/
-COPY --from=builder /go/src/github.com/mailslurper/mailslurper/cmd/mailslurper/mailslurper mailslurper
-
-EXPOSE 8080 8085 2500
-
-CMD ["./mailslurper"]
+  >> /build/config.json

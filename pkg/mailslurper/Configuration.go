@@ -117,12 +117,12 @@ GetPublicServiceURL returns a full protocol, address, and port for the MailSlurp
 */
 func (config *Configuration) GetPublicServiceURL() string {
 	if config.ServicePublicURL != "" {
-		return config.ServicePublicURL
+		return strings.TrimSuffix(config.ServicePublicURL, "/")
 	}
 
 	result := "http"
 
-	if config.CertFile != "" && config.KeyFile != "" {
+	if config.AdminCertFile != "" && config.AdminKeyFile != "" {
 		result += "s"
 	}
 

@@ -1,0 +1,40 @@
+version: v2
+
+builds:
+  mailslurper:
+    context: ./
+
+deployments:
+  mailslurper:
+    image: ${{ builds.mailslurper.id }}
+    command:
+      - sh
+      - -c
+      - |
+        apk update
+        apk add wget
+        wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+        mv jq-linux64 /usr/local/bin/jq
+        chmod +x /usr/local/bin/jq
+        tmpfile=$(mktemp)
+        jq '.wwwPublicURL="${{ ingresses.mailslurper.url }}" | .servicePublicURL="${{ ingresses.mailslurper-api.url }}"' config.json > "$tmpfile"
+        mv "$tmpfile" config.json
+        ./mailslurper
+
+services:
+  smtp:
+    deployment: mailslurper
+    port: 2500
+    protocol: smtps
+  mailslurper:
+    deployment: mailslurper
+    port: 8080
+  mailslurper-api:
+    deployment: mailslurper
+    port: 8085
+
+ingresses:
+  mailslurper:
+    service: mailslurper
+  mailslurper-api:
+    service: mailslurper-api
