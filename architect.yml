@@ -38,3 +38,5 @@ ingresses:
     service: mailslurper
   mailslurper-api:
     service: mailslurper-api
+    headers:
+      Access-Control-Allow-Origin: '*'
